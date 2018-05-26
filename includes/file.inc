@@ -2510,7 +2510,7 @@ function drupal_tempnam($directory, $prefix) {
   }
   else {
     // Handle as a normal tempnam() call.
-    return drupal_tempnam($directory, $prefix);
+    return tempnam($directory, $prefix);
   }
 }
 
