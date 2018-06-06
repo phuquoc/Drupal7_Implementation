@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * Replace interface language switcher block with content language switcher
+ * block.
+ */
+function language_switcher_update_7100() {
+  $mode = variable_get('language_switcher_mode', 'off');
+
+  if ($mode != 'off') {
+    $content_provider = variable_get("language_negotiation_language_content", array());
+
+    // If no providers has been assigned to content other than the default,
+    // assign interface provider.
+    if (sizeof($content_provider) == 1 && isset($content_provider['language-default'])) {
+      $language_providers = array(
+        LOCALE_LANGUAGE_NEGOTIATION_URL => 0,
+        LOCALE_LANGUAGE_NEGOTIATION_INTERFACE => 8,
+      );
+      // Enable content language URL detection.
+      language_negotiation_set(LANGUAGE_TYPE_CONTENT, $language_providers);
+    }
+
+    // Get interface language switcher block if it's visible.
+    $query = db_select('block', 'b');
+    $result = $query
+      ->fields('b')
+      ->condition('b.module', 'locale')
+      ->execute();
+
+    $block_info = $result->fetchAllAssoc('bid');
+
+    // Get language block and language content block details
+    foreach ($block_info as $block) {
+      if ($block->delta == 'language' && $block->status == 1) {
+        $language_block = $block;
+      }
+      elseif ($block->delta == 'language_content' && $language_block->theme == $block->theme) {
+        $language_content_block = $block;
+      }
+    }
+
+    // Set language content block as active and keep language block too
+    if (isset($language_block) && isset($language_content_block)) {
+      $bid = $language_content_block->bid;
+      $language_content_block = clone $language_block;
+      unset($language_content_block->bid);
+      unset($language_content_block->delta);
+      unset($language_content_block->theme);
+
+      db_update('block')
+        ->condition('bid', $bid)
+        ->condition('theme', $language_block->theme)
+        ->fields(get_object_vars($language_content_block))
+        ->execute();
+    }
+  }
+}
