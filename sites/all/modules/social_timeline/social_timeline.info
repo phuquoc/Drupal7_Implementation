@@ -1,0 +1,16 @@
+name = Social Timeline
+description = Integrates the jQuery Social Timeline plugin.
+core = 7.x
+package = jQuery
+
+dependencies[] = libraries (2.x)
+dependencies[] = jquery_update
+
+configure = admin/config/services/social-timeline
+
+; Information added by Drupal.org packaging script on 2017-03-10
+version = "7.x-2.0"
+core = "7.x"
+project = "social_timeline"
+datestamp = "1489186989"
+
